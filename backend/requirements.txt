@@ -1,0 +1,5 @@
+Django == 4.1.2
+psycopg2 == 2.9.4
+django-better-admin-arrayfield == 1.4.2
+PyJWT == 1.7.1
+djangorestframework == 3.14.0

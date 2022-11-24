@@ -1,0 +1,3 @@
+from .exercise_serializer import ExerciseSerializer
+from .competition_serializer import CompetitionSerializer
+from .team_serializer import TeamSerializer

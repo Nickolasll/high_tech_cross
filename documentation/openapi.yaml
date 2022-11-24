@@ -1,0 +1,714 @@
+openapi: 3.0.3
+
+info:
+  title: HighTechCross API
+  description: |-
+    Это API приложения HighTechCross. 
+    HighTechCross - такой формат соревнований выходного дня, когда несколько команд бегают по городу и делают разные технологичные задания. 
+    
+    Некоторые нюансы:
+    - В реальном приложении нужно учитывать, что в теле запроса могут быть данные в некорректном формате
+    в таком случае нужно обрабатывать это не 500 ошибкой, а возвращать ответ с другим кодом, например, 405.
+    Для простоты я опустил ответы сервера с ошибкам о неправильном формате в теле запроса.
+    - При получении подсказки к заданию /exercise_manager/hint/{exercise_id} или при попытке ввода ответа /exercise_manager/solve, сервер в ответ пришлет снепшот
+    задания. 
+    Клиент может по идентификатору найти и заменить в имеющемся у него списке заданий данные, 
+    но рекомендуется получить весь список от сервера заново запросом /exercise_manager/all_exercises
+    - В задании мы всегда работаем с актуальным соревнованием. 
+    Поэтому во всех запросах кроме /authorize необходимо передавать jwt токен, в котором зашита информация о команде и текущем соревновании. 
+    Таким образом в некоторых запросах вообще нет параметров, так как они берутся из токена. 
+    Но, если появится необходимость, например, работать с историей прошедших соревнований, то, придется явно передавать идентификаторы команды и соревнования.
+  contact:
+    email: NickolasII@yandex.ru
+  version: 0.0.8
+
+servers:
+  - url: https://127.0.0.1/api
+
+externalDocs:
+  description: Ссылка на задание
+  url: https://github.com/fa-rda/high-tech-cross.nickolay-magritov
+
+tags:
+  - name: authorize
+    description: Авторизация в приложение
+  - name: competition
+    description: Информация о текущем соревновании
+  - name: exercise_manager
+    description: Все операции с заданиями
+  - name: leaderboard
+    description: Получение таблицы лидеров
+
+paths:
+  /authorize:
+    post:
+      tags:
+        - authorize
+      summary: Авторизация в приложение HighTechCross.
+      requestBody:
+        description: Передаем логин и пароль для входа в приложение.
+          Для простоты пароль передается как есть.
+          Однако, передавать и хранить пароль в незашифрованном виде - неправильно, в реальной жизни я бы его шифровал еще до отправки.
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                login:
+                  type: string
+                  example: BestTeam
+                password:
+                  type: string
+                  example: SuperSecuredPassword1!
+        required: true
+      responses:
+        '200':
+          description: В случае успеха возвращаем JWT токен, идентификатор команды team_id и идентификатор соревнования competition_id.
+            В JWT токене храним информацию о том, когда он был выпущен, когда истечет, какой команде был присвоен и идентификатор текущего (актуального) соревнования.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  auth_token:
+                    type: string
+                    format: byte
+                    example: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE2NjUxMDA3OTksImlhdCI6MTY2NTA2ODY4MywidGVhbV9pZCI6ImQ4NDVkNTI4LTkzOTAtNDkwMC05ZTFlLWNiOWU4NjAzMjY3ZCIsInRvdXJuYW1lbnRfaWQiOiIxMzkzZGY0Yi0zZGQyLTRjYjctOTc2Ny0zODFkZjg3YTMwZjEifQ.ZvOJmkseKLi96emzKn_aQNZKDOV3sepq6oAO-kqCyEU
+                  team_id:
+                    type: string
+                    format: uuid
+                    example: 5e10de38-aad7-4a91-9018-23c7928b6913
+                  competition_id:
+                    type: string
+                    format: uuid
+                    example: 9695e741-26ed-4414-8160-69fe2fa8dc84
+
+        '403':
+          description: Выдается, если пользователь вводит невалидную комбинацию логин и пароль.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Неправильный логин или пароль.
+
+  /competition:
+    get:
+      tags:
+        - competition
+      summary: Получение информации о текущем соревновании.
+      description: Возвращает информацию о текущем соревновании.
+        Параметры не требуются, так как внутри токена, который мы передаем с запросом, хранится все необходимое.
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Информация о текущем соревновании для команды.
+            start_time - время начала соревнования; 
+            end_time - время окончания соревнования;
+            countdown - отсчет времени до начала соревнования;
+            time_left - отсчет до окончания соревнования;
+            status - текущий статус соревнования (всего 3 статуса - "Не начато", "В процессе" и "Завершено").
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Competition'
+
+        '401':
+          description: Выдается, если токен пользователя истек.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Токен команды недействителен или срок его действия истек.
+
+        '404':
+          description: Выдается, если ни одного соревнования для этой команды не было найдено.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Для данной команды не найдено соревнований.
+
+  /exercise_manager/all_exercises:
+    get:
+      tags:
+        - exercise_manager
+      summary: Получение всех заданий для команды в текущем соревновании.
+      description: Параметры не требуются, так как внутри токена, который мы передаем с запросом, хранится все необходимое.
+        Если бы была необходимость в выборе соревнования, например, в истории прошедших соревнований, то нужно было явно передавать competition_id.
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Список всех заданий для команды в рамках текущего соревнования.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Exercise'
+                example:
+                - id: 8d7c070d-4834-496d-9896-c26c25375ac0
+                  status: Сдано
+                  used_hints_count: 2
+                  wrong_attempts: 1
+                  completed_at: 2022-10-06T17:23:19.160978Z
+                  penalty_time: 1:00:00
+                  name: Очень сложное задание
+                  coordinates: ['54.776207', '32.031129']
+                  description: Подробное описание очень сложного задания
+                  hints: [Очень простая ненавязчивая подсказка., Более навязчивая и конкретная подсказка.]
+                  max_hints: 3
+                  is_hint_available: false
+                - id: 33d5b6a5-f6e5-4753-bbb8-9a1ec324dcaa
+                  status: Попытка сдачи
+                  used_hints_count: 1
+                  wrong_attempts: 1
+                  completed_at: null
+                  penalty_time: 0:45:00
+                  name: Второе не менее сложное задание
+                  coordinates: ['54.772011', '32.037274']
+                  description: Подробное описание второго не менее сложного задания
+                  hints: [Очень простая ненавязчивая подсказка.]
+                  max_hints: 3
+                  is_hint_available: true
+                - id: 0c59ff6a-9555-4c49-a862-82b25cab9cd2
+                  status: Не начато
+                  used_hints_count: 0
+                  wrong_attempts: 0
+                  completed_at: null
+                  penalty_time: 0:00:00
+                  name: Третье сложное задание
+                  coordinates: ['54.773704', '32.032585']
+                  description: Подробное описание третьего сложного задания
+                  hints: []
+                  max_hints: 3
+                  is_hint_available: true
+
+        '401':
+          description: Выдается, если токен пользователя истек.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Токен команды недействителен или срок его действия истек.
+
+        '404':
+          description: Выдается, если не было найдено соревнование в рамках которого хочется получить список всех заданий.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Соревнование не найдено.
+
+  /exercise_manager/exercise/{exercise_id}:
+    get:
+      tags:
+        - exercise_manager
+      summary: Получение одного задания по идентификатору.
+      description: Получение одного задания по идентификатору для команды в текущем соревновании.
+      parameters:
+        - name: exercise_id
+          in: path
+          description: Идентификатор задания, которое хотим получить.
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: 8d7c070d-4834-496d-9896-c26c25375ac0
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Задание для команды team_id в рамках соревнования competition_id.
+          content:
+            application/json:
+              schema:
+                  $ref: '#/components/schemas/Exercise'
+
+        '400':
+          description: Выдается, если пытаемся посмотреть задание чужой команды или не в текущем соревновании. 
+            Возможно в данном случае правильнее выдавать код 403.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Мы не можем показать содержимое этого задания.
+
+        '401':
+          description: Выдается, если токен пользователя истек.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Токен команды недействителен или срок его действия истек.
+
+        '404':
+          description: Выдается, если по идентификатору не было найдено задание.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Задание не найдено.
+
+  /exercise_manager/pick_hint:
+    post:
+      tags:
+        - exercise_manager
+      summary: Получение подсказки к заданию по идентификатору задания и номеру подсказки.
+      description: Возвращает подсказку к заданию по идентификатору задания exercise_id, если это возможно.
+      requestBody:
+        description: Передаем идентификатор задания exercise_id и номер подсказки number, которую хотим получить
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                exercise_id:
+                  type: string
+                  format: uuid
+                  example: 33d5b6a5-f6e5-4753-bbb8-9a1ec324dcaa
+                number:
+                  type: integer
+                  example: 2
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Подсказка для задания и снепшот самого задания.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  hint:
+                    type: string
+                    example: Вторая подсказка.
+                  exercise:
+                    example:
+                      id: 33d5b6a5-f6e5-4753-bbb8-9a1ec324dcaa
+                      status: Попытка сдачи
+                      used_hints_count: 2
+                      wrong_attempts: 1
+                      completed_at: null
+                      penalty_time: 0:60:00
+                      name: Второе не менее сложное задание
+                      coordinates: ['54.772011', '32.037274']
+                      description: Подробное описание второго не менее сложного задания
+                      hints: [Очень простая ненавязчивая подсказка., Вторая подсказка.]
+                      max_hints: 3
+                      is_hint_available: true
+
+        '400':
+          description: Выдается, если пытаемся посмотреть подсказку к заданию чужой команды или не в текущем соревновании. 
+            Возможно в данном случае правильнее выдавать код 403.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Мы не можем показать подсказку к данному заданию.
+
+        '401':
+          description: Выдается, если токен пользователя истек.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Токен команды недействителен или срок его действия истек.
+
+        '404':
+          description: Выдается, если по идентификатору не было найдено задание.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Задание не найдено.
+
+        '405':
+          description: Выдается, если невозможно выдать подсказку 
+            - достигнут максимальный предел подсказок; 
+            или попытка получить подсказку к выполненному заданию; 
+            или соревнование уже завершено.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Не удалось получить подсказку - достигнут предел количества подсказок.
+
+  /exercise_manager/solve:
+    post:
+      tags:
+        - exercise_manager
+      summary: Отправляем ответ по заданию на проверку.
+      description: Отправляем ответ по заданию exercise_id на проверку.
+      requestBody:
+        description: Передаем идентификатор задания exercise_id и сам ответ answer, а также 
+          request_id - идентификатор запроса, с которым клиент должен заново запрашивать результат в случае
+          потери интернет соединения
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                request_id:
+                  type: string
+                  format: uuid
+                  example: f569bcb2-0e16-4cbb-bb1e-415e55097e13
+                exercise_id:
+                  type: string
+                  format: uuid
+                  example: 33d5b6a5-f6e5-4753-bbb8-9a1ec324dcaa
+                answer:
+                  type: string
+                  example: Ответ на задание
+        required: true
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Результат проверки задания, success = true / false показывает, правильный ли был ответ.
+            На всякий случай возвращаем еще и снепшот задания.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  exercise:
+                    example:
+                      id: 33d5b6a5-f6e5-4753-bbb8-9a1ec324dcaa
+                      status: Сдано
+                      used_hints_count: 1
+                      wrong_attempts: 1
+                      completed_at: 2022-10-06T17:33:19.160978Z
+                      penalty_time: 0:45:00
+                      name: Второе не менее сложное задание
+                      coordinates: ['54.772011', '32.037274']
+                      description: Подробное описание второго не менее сложного задания
+                      hints: [Очень простая ненавязчивая подсказка.]
+                      max_hints: 3
+                      is_hint_available: false
+        '400':
+          description: Выдается, если пытаемся ответить на чужое или на задание не в текущем соревновании. 
+            Возможно в данном случае правильнее выдавать код 403.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Вы не можете отвечать на это задание.
+
+        '401':
+          description: Выдается, если токен пользователя истек.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Токен команды недействителен или срок его действия истек.
+
+        '404':
+          description: Выдается, если по идентификатору не было найдено задание.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Задание не найдено.
+
+  /leaderboard:
+    get:
+      tags:
+        - leaderboard
+      summary: Получение таблицы лидеров текущего соревнования.
+      description: Параметры не требуются, так как внутри токена, который мы передаем с запросом, хранится все необходимое.
+        Если бы была необходимость в выборе соревнования, например, для работы с историей прошедших соревнований, то нужно будет явно передавать competition_id.
+        По заданию вместе с таблицей лидеров нужно выводить время начала и конца турнира. Но таблице лидеров не обязана отдавать знания о турнире, поэтому 
+        для данного экрана потребуется сделать запрос к /competition
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Данные для таблицы лидеров и метаданные о том, как данную таблицу рисовать.
+            Вместе с данными приходят и идентификаторы команд, так можно будет по team_id найти и выделить не клиенте цветом результат команды.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Leaderboard'
+
+        '401':
+          description: Выдается, если токен пользователя истек.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Токен команды недействителен или срок его действия истек.
+
+        '404':
+          description: Выдается, если не было найдено соревнование в рамках которого хочется получить таблицу лидеров.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Соревнование не найдено.
+
+components:
+  schemas:
+
+    Competition:
+      type: object
+      properties:
+        start_time:
+          type: string
+          format: date-time
+          example: 2022-10-06T15:23:19.160978Z
+        end_time:
+          type: string
+          format: date-time
+          example: 2022-10-06T20:23:19.160978Z
+        countdown:
+          type: string
+          format: timedelta
+          example: 0:13:21
+        time_left:
+          type: string
+          format: timedelta
+          example: 5:00:00
+        status:
+          type: string
+          example: Не начато
+
+    Exercise:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 865ab4a6-a6b8-457c-8819-b31a547fbf78
+        status:
+          type: string
+          example: Сдано
+        used_hints_count:
+          type: integer
+          example: 2
+        wrong_attempts:
+          type: integer
+          example: 1
+        completed_at:
+          type: string
+          format: date-time
+          example: 2022-10-06T17:23:19.160978Z
+        penalty_time:
+          type: string
+          format: timedelta
+          example: 1:00:00
+        name:
+          type: string
+          example: Очень сложное задание
+        coordinates:
+          type: array
+          items:
+            type: string
+            example:
+            - '54.776207'
+            - '32.031129'
+        description:
+          type: string
+          example: Подробное описание очень сложного задания
+        hints:
+          type: array
+          items:
+            type: string
+            example:
+            - Очень простая ненавязчивая подсказка.
+            - Более навязчивая и конкретная подсказка.
+        max_hints:
+          type: integer
+          example: 3
+        is_hint_available:
+          type: boolean
+          example: false
+
+    ColumnHeader:
+      type: object
+      properties:
+        col_name:
+          type: string
+          example: Текущее место команды
+        property_name:
+          type: string
+          example: position
+        value_type:
+          type: string
+          example: integer
+        is_visible:
+          type: boolean
+          example: true
+
+    Leaderboard:
+      type: object
+      properties:
+        meta:
+          type: object
+          properties:
+            col_count:
+              type: integer
+              example: 8
+            row_count:
+              type: integer
+              example: 3
+            column_headers:
+              type: array
+              items:
+                $ref: '#/components/schemas/ColumnHeader'
+              example:
+                - col_name: Текущее место команды
+                  property_name: position
+                  value_type: integer
+                  is_visible: true
+                - col_name: Идентификатор команды
+                  property_name: team_id
+                  value_type: uuid
+                  is_visible: false
+                - col_name: Название команды
+                  property_name: team_name
+                  value_type: string
+                  is_visible: true
+                - col_name: Очень сложное задание
+                  property_name: exercise_1
+                  value_type: datetime
+                  is_visible: true
+                - col_name: Второе не менее сложное задание
+                  property_name: exercise_2
+                  value_type: datetime
+                  is_visible: true
+                - col_name: Третье сложное задание
+                  property_name: exercise_3
+                  value_type: datetime
+                  is_visible: true
+                - col_name: Количество сданных заданий
+                  property_name: completed_exercises_count
+                  value_type: integer
+                  is_visible: true
+                - col_name: Суммарное штрафное время
+                  property_name: total_penalty_time
+                  value_type: timedelta
+                  is_visible: true
+            records:
+              type: array
+              items:
+                type: object
+                properties:
+                  position:
+                    type: integer
+                    example: 1
+                  team_id:
+                    type: string
+                    format: uuid
+                    example: 5e10de38-aad7-4a91-9018-23c7928b6913
+                  team_name:
+                    type: string
+                    example: Лучшая команда
+                  exercise_1:
+                    type: string
+                    format: date-time
+                    example: "2022-10-06T17:23:19.160978Z"
+                  exercise_2:
+                    type: string
+                    format: date-time
+                    example: "2022-10-06T17:33:19.160978Z"
+                  exercise_3:
+                    type: string
+                    format: date-time
+                    example: null
+                  completed_exercises_count:
+                    type: integer
+                    example: 2
+                  total_penalty_time:
+                    type: string
+                    format: timedelta
+                    example: 1:45:00
+              example:
+              - position: 1
+                team_id: 5e10de38-aad7-4a91-9018-23c7928b6913
+                team_name: Лучшая команда
+                exercise_1: "2022-10-06T17:23:19.160978Z"
+                exercise_2: "2022-10-06T17:33:19.160978Z"
+                exercise_3: null
+                completed_exercises_count: 2
+                total_penalty_time: 1:45:00
+              - position: 2
+                team_id: ea2c6d48-2484-4a93-bc99-faba0c92a9e1
+                team_name: Не самая лучшая команда
+                exercise_1: "2022-10-06T17:35:19.160978Z"
+                exercise_2: null
+                exercise_3: null
+                completed_exercises_count: 1
+                total_penalty_time: 1:15:00
+              - position: 3
+                team_id: 34755c82-e350-4b60-8a0c-976c20631fec
+                team_name: Аутсайдеры
+                exercise_1: null
+                exercise_2: null
+                exercise_3: null
+                completed_exercises_count: 0
+                total_penalty_time: 3:15:00
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+security:
+  - bearerAuth: []

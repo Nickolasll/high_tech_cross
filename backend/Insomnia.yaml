@@ -1,0 +1,292 @@
+_type: export
+__export_format: 4
+__export_date: 2022-10-29T09:10:37.490Z
+__export_source: insomnia.desktop.app:v2022.6.0
+resources:
+  - _id: req_be64852a60904ccfb8730187fff660ed
+    parentId: wrk_3a99b75efb664475ac3dced389b3c3e5
+    modified: 1667030964206
+    created: 1666473118451
+    url: http://localhost:8000/api/authorize
+    name: authorize
+    description: ""
+    method: POST
+    body:
+      mimeType: application/json
+      text: |-
+        {
+        	"login": "best_team",
+        	"password": "777"
+        }
+    parameters: []
+    headers:
+      - name: Content-Type
+        value: application/json
+        id: pair_772ae210ab164fb7ac3ea73edf425ea2
+      - id: pair_16b7f82a01864731a02bf8acdea9dfd0
+        name: credentials
+        value: include
+        description: ""
+    authentication:
+      type: bearer
+      token: ""
+      disabled: true
+    metaSortKey: -1629978885295
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: wrk_3a99b75efb664475ac3dced389b3c3e5
+    parentId: null
+    modified: 1666473118442
+    created: 1666473118442
+    name: high_tech_cross
+    description: ""
+    scope: collection
+    _type: workspace
+  - _id: req_46238c013a6b4088972d871146353669
+    parentId: wrk_3a99b75efb664475ac3dced389b3c3e5
+    modified: 1667032106884
+    created: 1666640137590
+    url: http://localhost:8000/api/competition
+    name: competition
+    description: ""
+    method: GET
+    body: {}
+    parameters: []
+    headers:
+      - id: pair_16b7f82a01864731a02bf8acdea9dfd0
+        name: credentials
+        value: include
+        description: ""
+    authentication:
+      type: bearer
+      token: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE2NjcwNTAwOTcsImlhdCI6MTY2NzAzMjA5NywidGVhbV9pZCI6ImFmZTNiNzBjLTY4NzktNGJmNC04ZjU4LTA3ODk4ZmExMTdmOCIsImNvbXBldGl0aW9uX2lkIjoiYzY3YzZiNWMtZWQzZS00MWJhLTlmMmUtZDBhNmZhNGM3Y2YyIn0.XrujDOgUT3UQZ0RI68-k11IJ1PPJ_EMpOkvm21TwI14
+      disabled: false
+    metaSortKey: -1629978885288.75
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: req_a51cca5dbea346e08d36922719ab0fcc
+    parentId: wrk_3a99b75efb664475ac3dced389b3c3e5
+    modified: 1667033152936
+    created: 1666727403914
+    url: http://localhost:8000/api/exercise_manager/all_exercises
+    name: get all exercises
+    description: ""
+    method: GET
+    body: {}
+    parameters: []
+    headers:
+      - id: pair_16b7f82a01864731a02bf8acdea9dfd0
+        name: credentials
+        value: include
+        description: ""
+    authentication:
+      type: bearer
+      token: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE2NjcwNTAwOTcsImlhdCI6MTY2NzAzMjA5NywidGVhbV9pZCI6ImFmZTNiNzBjLTY4NzktNGJmNC04ZjU4LTA3ODk4ZmExMTdmOCIsImNvbXBldGl0aW9uX2lkIjoiYzY3YzZiNWMtZWQzZS00MWJhLTlmMmUtZDBhNmZhNGM3Y2YyIn0.XrujDOgUT3UQZ0RI68-k11IJ1PPJ_EMpOkvm21TwI14
+      disabled: false
+    metaSortKey: -1629978885285.625
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: req_7f197e5416674d6d965b92d8d9c30085
+    parentId: wrk_3a99b75efb664475ac3dced389b3c3e5
+    modified: 1667034533759
+    created: 1666731063992
+    url: http://localhost:8000/api/exercise_manager/exercise/b186a36e-ee00-4bd3-a382-961e3f0616b1
+    name: get one exercise
+    description: ""
+    method: GET
+    body: {}
+    parameters: []
+    headers:
+      - id: pair_16b7f82a01864731a02bf8acdea9dfd0
+        name: credentials
+        value: include
+        description: ""
+    authentication:
+      type: bearer
+      token: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE2NjcwNDg5NjUsImlhdCI6MTY2NzAzMDk2NSwidGVhbV9pZCI6ImFmZTNiNzBjLTY4NzktNGJmNC04ZjU4LTA3ODk4ZmExMTdmOCIsImNvbXBldGl0aW9uX2lkIjoiYzY3YzZiNWMtZWQzZS00MWJhLTlmMmUtZDBhNmZhNGM3Y2YyIn0.GjJMP_uctBQ_POojveKOl__bsqWyhl5brzrkHUYEP8M
+      disabled: false
+    metaSortKey: -1629978885284.0625
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: req_91905ccef0a141008b8774ca3c359ff1
+    parentId: wrk_3a99b75efb664475ac3dced389b3c3e5
+    modified: 1667034551748
+    created: 1666733181053
+    url: http://localhost:8000/api/exercise_manager/pick_hint
+    name: pick hint
+    description: ""
+    method: POST
+    body:
+      mimeType: application/json
+      text: |-
+        {
+        	"exercise_id": "25fb04dd-baee-4387-8563-8eb66e25f152",
+        	"number": 0
+        }
+    parameters: []
+    headers:
+      - id: pair_16b7f82a01864731a02bf8acdea9dfd0
+        name: credentials
+        value: include
+        description: ""
+      - name: Content-Type
+        value: application/json
+    authentication:
+      type: bearer
+      token: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE2NjcwNDg5NjUsImlhdCI6MTY2NzAzMDk2NSwidGVhbV9pZCI6ImFmZTNiNzBjLTY4NzktNGJmNC04ZjU4LTA3ODk4ZmExMTdmOCIsImNvbXBldGl0aW9uX2lkIjoiYzY3YzZiNWMtZWQzZS00MWJhLTlmMmUtZDBhNmZhNGM3Y2YyIn0.GjJMP_uctBQ_POojveKOl__bsqWyhl5brzrkHUYEP8M
+      disabled: false
+    metaSortKey: -1629978885283.2812
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: req_9850e4e249564798acf579e58a9821ea
+    parentId: wrk_3a99b75efb664475ac3dced389b3c3e5
+    modified: 1667034567719
+    created: 1666813139656
+    url: http://localhost:8000/api/exercise_manager/solve
+    name: solve
+    description: ""
+    method: POST
+    body:
+      mimeType: application/json
+      text: |-
+        {
+        	"request_id": "25fb04dd-baee-4387-8563-8eb66e25f152",
+        	"exercise_id": "25fb04dd-baee-4387-8563-8eb66e25f152",
+        	"answer": "wrong"
+        }
+    parameters: []
+    headers:
+      - id: pair_16b7f82a01864731a02bf8acdea9dfd0
+        name: credentials
+        value: include
+        description: ""
+      - name: Content-Type
+        value: application/json
+    authentication:
+      type: bearer
+      token: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE2NjcwNTAwOTcsImlhdCI6MTY2NzAzMjA5NywidGVhbV9pZCI6ImFmZTNiNzBjLTY4NzktNGJmNC04ZjU4LTA3ODk4ZmExMTdmOCIsImNvbXBldGl0aW9uX2lkIjoiYzY3YzZiNWMtZWQzZS00MWJhLTlmMmUtZDBhNmZhNGM3Y2YyIn0.XrujDOgUT3UQZ0RI68-k11IJ1PPJ_EMpOkvm21TwI14
+      disabled: false
+    metaSortKey: -1629978885282.8906
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: req_572c1da2487042dda9816a9ca6988a48
+    parentId: wrk_3a99b75efb664475ac3dced389b3c3e5
+    modified: 1667031864605
+    created: 1666904354793
+    url: http://localhost:8000/api/leaderboard
+    name: leaderboard
+    description: ""
+    method: GET
+    body: {}
+    parameters: []
+    headers:
+      - id: pair_16b7f82a01864731a02bf8acdea9dfd0
+        name: credentials
+        value: include
+        description: ""
+    authentication:
+      type: bearer
+      token: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE2NjcwNDg5NjUsImlhdCI6MTY2NzAzMDk2NSwidGVhbV9pZCI6ImFmZTNiNzBjLTY4NzktNGJmNC04ZjU4LTA3ODk4ZmExMTdmOCIsImNvbXBldGl0aW9uX2lkIjoiYzY3YzZiNWMtZWQzZS00MWJhLTlmMmUtZDBhNmZhNGM3Y2YyIn0.GjJMP_uctBQ_POojveKOl__bsqWyhl5brzrkHUYEP8M
+      disabled: false
+    metaSortKey: -1629978885282.6953
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: env_216c51d1afbb4f4a8791be7fb9b0da83
+    parentId: wrk_3a99b75efb664475ac3dced389b3c3e5
+    modified: 1666473118443
+    created: 1666473118443
+    name: Base Environment
+    data:
+      Authorization: Bearer
+        eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE2MzAwMTE1OTksImlhdCI6MTYyOTk3ODc2MywidXNlcl9pZCI6Ijg1NTFjNDVhLTlmODQtNDZjZC1iZjM5LTdjMDU0ZDMyMzY0NSIsInRlbmFudF9pZCI6IjkwMzJjMmUxLTcyMjEtNDEzZC05NjM3LTkwZGYyN2NlY2VmOCJ9.k2ZwiRUvUWpi6VEnVBpHm1jjX1yjc9BuJkgj4ffoghM
+    dataPropertyOrder:
+      "&":
+        - Authorization
+    color: null
+    isPrivate: false
+    metaSortKey: 1629978721710
+    _type: environment
+  - _id: jar_1424ef9e68a14337a046d32dd249e042
+    parentId: wrk_3a99b75efb664475ac3dced389b3c3e5
+    modified: 1666473118447
+    created: 1666473118447
+    name: Default Jar
+    cookies:
+      - key: balancing-cookie
+        value: 1660645888.49.1957.164471
+        expires: 2022-08-18T10:31:27.000Z
+        maxAge: 172800
+        domain: api.qase.io
+        path: /
+        secure: true
+        httpOnly: true
+        hostOnly: true
+        creation: 2022-08-16T10:31:27.678Z
+        lastAccessed: 2022-08-16T10:31:27.678Z
+        id: "7798623963953164"
+    _type: cookie_jar
+  - _id: spc_de8365566d054a99ba3a1d0b7f72bd80
+    parentId: wrk_3a99b75efb664475ac3dced389b3c3e5
+    modified: 1666473118475
+    created: 1666473118449
+    fileName: high_tech_cross
+    contents: ""
+    contentType: yaml
+    _type: api_spec
+  - _id: env_85cb61892291461981829254807adebf
+    parentId: env_216c51d1afbb4f4a8791be7fb9b0da83
+    modified: 1666473118444
+    created: 1666473118444
+    name: New Environment
+    data:
+      Authorization: Bearer
+        eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE2NTU5NDIzOTksImlhdCI6MTY1NTg5NzE1MCwidXNlcl9pZCI6Ijg1NTFjNDVhLTlmODQtNDZjZC1iZjM5LTdjMDU0ZDMyMzY0NSIsInRlbmFudF9pZCI6IjkwMzJjMmUxLTcyMjEtNDEzZC05NjM3LTkwZGYyN2NlY2VmOCJ9.iajBmcydPni1f4_fISK-rXRemg-SV4p3Ovl0Tv_j0xU
+    dataPropertyOrder:
+      "&":
+        - Authorization
+    color: null
+    isPrivate: false
+    metaSortKey: 1629978820800
+    _type: environment
